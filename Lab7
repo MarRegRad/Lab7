@@ -1,0 +1,55 @@
+class WordGenerator: #класс используется для генерации слов и поиска слов, удовлетворяющих условию
+    def __init__(self, letters):
+        self.letters = letters
+
+    def generate_words(self): #генерация всех возможных слов
+        if len(self.letters) == 0:
+            return {''} #возвращаем пустое множество, если буквы закончились
+        else:
+            first = self.letters[0] #Берем первую букву
+            rest = self.letters[1:] #Берем оставшиеся буквы
+            words = WordGenerator(rest).generate_words()  #рекурсивно генерируем слова из оставшихся букв
+            result = set()  #Создаем пустое множество для хранения слов
+            for word in words:
+                for i in range(len(word) + 1):
+                    new_word = word[:i] + first + word[i:]
+                    result.add(new_word)
+            result.update(words)
+            return result
+
+    def find_words(self): #поиск слов, удовлетворяющих условию
+        max_count_sogl = 0
+        res = []
+        sogl = "бркд"
+        gl = "а"
+        words = self.generate_words()
+
+        for i in words:
+            rule = True  #флаг для проверки условия
+            count_sogl = 0
+            for j in range(len(i)):
+                if (j % 2 == 1):  #проверяем, находится ли буква на четной позиции
+                    if i[j] in sogl:  #проверяем, является ли буква согласной
+                        count_sogl += 1
+            for j in range(0, len(i) - 1):
+                if ((i[j] in sogl) and (i[j + 1] in sogl)):  # Проверяем, являются ли две соседние буквы согласными
+                    rule = False
+            if rule:
+                if count_sogl == max_count_sogl:
+                    res.append(i)
+                if count_sogl > max_count_sogl:
+                    res = []
+                    max_count_sogl = count_sogl
+                    res.append(i)
+
+        return max_count_sogl, len(res), res
+letters = "абракадабра"
+word_generator = WordGenerator(letters)
+max_count_sogl, num_res, res = word_generator.find_words()
+
+print(f"""
+Максимальное число согласных в слове на чётных местах: {max_count_sogl}
+Кол-во ликсем, удовлетворяющих условию: {num_res}
+Лексемы, удовлетворяющие условию:""")
+for i in res:
+    print(i)
